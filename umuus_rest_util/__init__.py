@@ -41,13 +41,14 @@ Usage
     $ cat options.json
 
     {"paths": [
-        {"path": "umuus_rest_util:test_view"},
+        {"module": "umuus_rest_util", "endpoint": "/PREFIX"},
+        {"path": "umuus_rest_util:test_view", "endpoint": "/default"},
         {"path": "umuus_rest_util:test_string_view", "endpoint": "/message"},
         {"path": "umuus_rest_util:test_error_view", "endpoint": "/error"}
     ],
      "server": {
-         "host": "localhost",
-         "port": 8033,
+         "host": "0.0.0.0",
+         "port": 8003,
          "options": {
              "certfile": "server.crt",
              "keyfile": "server.key"
@@ -148,6 +149,7 @@ GPLv3 <https://www.gnu.org/licenses/>
 """
 import sys
 import traceback
+import types
 import importlib
 import json
 import functools
@@ -208,6 +210,10 @@ def test_error_view(**kwargs):
     return 0 / 0
 
 
+def _test_private_view(**kwargs):
+    return 0 / 0
+
+
 def wrapper(fn,
             auth_url='',
             method='GET',
@@ -237,7 +243,12 @@ def wrapper(fn,
                                    list(flask.request.form.items()))
             }
             res = json_encode(fn(**request_params))
-            return flask.Response(res, headers=headers)
+            return flask.Response(
+                json.dumps(res),
+                content_type=(isinstance(res, dict) and 'application/json'
+                              or None),
+                headers=headers,
+            )
         except Exception as err:
             traceback.print_exc(file=sys.stderr)
             return flask.Response(
@@ -273,6 +284,22 @@ def import_from_path(data):
     return locals()
 
 
+@addict_decorator()
+def import_from_module(data):
+    module = importlib.import_module(data.module)
+    mapping = [
+        dict(
+            function=value,
+            module=module,
+            data=dict(
+                endpoint=data.endpoint and data.endpoint + '/' + value.__name__
+                or None),
+        ) for key, value in vars(module).items()
+        if not key.startswith('_') and type(value) == types.FunctionType
+    ]
+    return locals()
+
+
 def json_encode_value(s):
     try:
         return json.loads(s)
@@ -299,7 +326,12 @@ def json_encode(d):
 @addict_decorator()
 def run(options={}):
     app = flask.Flask(__name__)
-    items = [import_from_path(item) for item in options.paths]
+    items = []
+    for item in options.paths:
+        if item.path:
+            items.append(import_from_path(item))
+        if item.module:
+            items += import_from_module(item).mapping
     for item in items:
         app.route(
             item.data.endpoint

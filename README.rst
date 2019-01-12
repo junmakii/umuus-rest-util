@@ -22,13 +22,14 @@ Usage
     $ cat options.json
 
     {"paths": [
-        {"path": "umuus_rest_util:test_view"},
+        {"module": "umuus_rest_util", "endpoint": "/PREFIX"},
+        {"path": "umuus_rest_util:test_view", "endpoint": "/default"},
         {"path": "umuus_rest_util:test_string_view", "endpoint": "/message"},
         {"path": "umuus_rest_util:test_error_view", "endpoint": "/error"}
     ],
      "server": {
-         "host": "localhost",
-         "port": 8033,
+         "host": "0.0.0.0",
+         "port": 8003,
          "options": {
              "certfile": "server.crt",
              "keyfile": "server.key"
