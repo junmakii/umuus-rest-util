@@ -22,9 +22,10 @@ Usage
     $ cat options.json
 
     {"paths": [
-       {"path": "umuus_rest_util:test_view"},
-       {"path": "umuus_rest_util:test_view", "endpoint": "/test"}
-     ],
+        {"path": "umuus_rest_util:test_view"},
+        {"path": "umuus_rest_util:test_string_view", "endpoint": "/message"},
+        {"path": "umuus_rest_util:test_error_view", "endpoint": "/error"}
+    ],
      "server": {
          "host": "localhost",
          "port": 8033,
