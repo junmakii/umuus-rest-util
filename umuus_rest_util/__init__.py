@@ -31,13 +31,6 @@ Usage
 
     $ python DJANGO_APP.py runserver localhost:8000
 
-    $ python umuus_rest_util.py run --paths '["umuus_rest_util:test_view"]' --auth_url 'http://localhost:8000/api/user/'
-
-    $ curl -s http://admin:password@127.0.0.1:5000/umuus_rest_util/test_view
-    {"message": "OK"}
-
-----
-
     $ cat options.json
 
     {"paths": [
