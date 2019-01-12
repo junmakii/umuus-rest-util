@@ -17,22 +17,24 @@ Usage
     $ curl -s http://admin:password@127.0.0.1:5000/umuus_rest_util/test_view
     {"message": "OK"}
 
-$ cat options.json
+----
 
-{"paths": ["umuus_rest_util:test_view"],
- "server": {
-     "host": "localhost",
-     "port": 8033,
-     "options": {
-         "certfile": "server.crt",
-         "keyfile": "server.key"
-     }
- },
- "auth_url": "http://0.0.0.0:8000/api/user/"}
+    $ cat options.json
 
-$ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
+    {"paths": ["umuus_rest_util:test_view"],
+     "server": {
+         "host": "localhost",
+         "port": 8033,
+         "options": {
+             "certfile": "server.crt",
+             "keyfile": "server.key"
+         }
+     },
+     "auth_url": "http://0.0.0.0:8000/api/user/"}
 
-curl https://127.0.0.1:8033/umuus_rest_util/test_view
+    $ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
+
+    curl https://127.0.0.1:8033/umuus_rest_util/test_view
 
 JWT(JSON Web Token)
 -------------------

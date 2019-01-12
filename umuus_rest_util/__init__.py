@@ -36,22 +36,24 @@ Usage
     $ curl -s http://admin:password@127.0.0.1:5000/umuus_rest_util/test_view
     {"message": "OK"}
 
-$ cat options.json
+----
 
-{"paths": ["umuus_rest_util:test_view"],
- "server": {
-     "host": "localhost",
-     "port": 8033,
-     "options": {
-	 "certfile": "server.crt",
-	 "keyfile": "server.key"
-     }
- },
- "auth_url": "http://0.0.0.0:8000/api/user/"}
+    $ cat options.json
 
-$ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
+    {"paths": ["umuus_rest_util:test_view"],
+     "server": {
+         "host": "localhost",
+         "port": 8033,
+         "options": {
+             "certfile": "server.crt",
+             "keyfile": "server.key"
+         }
+     },
+     "auth_url": "http://0.0.0.0:8000/api/user/"}
 
-curl https://127.0.0.1:8033/umuus_rest_util/test_view
+    $ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
+
+    curl https://127.0.0.1:8033/umuus_rest_util/test_view
 
 JWT(JSON Web Token)
 -------------------
@@ -84,63 +86,6 @@ import fire
 import attr
 import addict
 import gunicorn.app.base
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-# Copyright (C) 2018  Jun Makii <junmakii@gmail.com>
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-"""Utilities, tools, and scripts for Python.
-
-umuus-rest-util
-===============
-
-Installation
-------------
-
-    $ pip install git+https://github.com/junmakii/umuus-rest-util.git
-
-Example
--------
-
-    $ umuus_rest_util
-
-    >>> import umuus_rest_util
-
-
-
-Authors
--------
-
-- Jun Makii <junmakii@gmail.com>
-
-License
--------
-
-GPLv3 <https://www.gnu.org/licenses/>
-
-"""
-import sys
-import json
-import functools
-import logging
-logger = logging.getLogger(__name__)
-import fire
-import attr
-import addict
-import requests
 __version__ = '0.1'
 __url__ = 'https://github.com/junmakii/umuus-rest-util'
 __author__ = 'Jun Makii'
