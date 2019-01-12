@@ -85,7 +85,7 @@ setup(
  '\n'
  '    $ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"\n'
  '\n'
- '    curl https://127.0.0.1:8033/umuus_rest_util/test_view\n'
+ '    $ curl https://127.0.0.1:8033/umuus_rest_util/test_view\n'
  '\n'
  'JWT(JSON Web Token)\n'
  '-------------------\n'

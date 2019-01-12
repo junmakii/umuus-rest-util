@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C)    <junmakii@gmail.com>
+# Copyright (C) Jun Makii <junmakii@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ Usage
 
     $ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
 
-    curl https://127.0.0.1:8033/umuus_rest_util/test_view
+    $ curl https://127.0.0.1:8033/umuus_rest_util/test_view
 
 JWT(JSON Web Token)
 -------------------

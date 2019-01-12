@@ -34,7 +34,7 @@ Usage
 
     $ python umuus_rest_util.py run --options "$(cat /tmp/options.json)"
 
-    curl https://127.0.0.1:8033/umuus_rest_util/test_view
+    $ curl https://127.0.0.1:8033/umuus_rest_util/test_view
 
 JWT(JSON Web Token)
 -------------------
