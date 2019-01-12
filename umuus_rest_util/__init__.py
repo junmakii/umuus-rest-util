@@ -174,6 +174,7 @@ __install_requires__ = [
     'addict==2.2.0',
     'gunicorn==19.9.0',
     'attrs==18.2.0',
+    'whitenoise==4.1.2',
 ]
 __dependency_links__ = []
 __classifiers__ = []
