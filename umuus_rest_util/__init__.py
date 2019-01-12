@@ -40,7 +40,10 @@ Usage
 
     $ cat options.json
 
-    {"paths": ["umuus_rest_util:test_view"],
+    {"paths": [
+       {"path": "umuus_rest_util:test_view"},
+       {"path": "umuus_rest_util:test_view", "endpoint": "/test"}
+     ],
      "server": {
          "host": "localhost",
          "port": 8033,
@@ -143,6 +146,7 @@ GPLv3 <https://www.gnu.org/licenses/>
 
 """
 import sys
+import traceback
 import importlib
 import json
 import functools
@@ -193,6 +197,14 @@ def test_view(**kwargs):
     return dict(message='OK')
 
 
+def test_string_view(**kwargs):
+    return 'OK'
+
+
+def test_error_view(**kwargs):
+    return 0 / 0
+
+
 def auth_wrapper(fn, auth_url='', method='GET'):
     @functools.wraps(fn)
     def wrapper():
@@ -213,8 +225,9 @@ def auth_wrapper(fn, auth_url='', method='GET'):
                                    list(flask.request.form.items()))
             }
             if res.status_code == 200:
+                res = json_encode(fn(**request_params))
                 return flask.Response(
-                    json.dumps(fn(**request_params)),
+                    res,
                     headers=headers,
                 )
             else:
@@ -224,9 +237,14 @@ def auth_wrapper(fn, auth_url='', method='GET'):
                     headers=dict(res.headers, **headers),
                 )
         except Exception as err:
-            import traceback
             traceback.print_exc(file=sys.stderr)
-            return flask.Response(str(err), status=500)
+            return flask.Response(
+                json.dumps(
+                    dict(
+                        error=repr(err),
+                        reason='\n'.join(
+                            traceback.format_exception(*sys.exc_info())))),
+                status=500)
 
     return wrapper
 
@@ -246,8 +264,8 @@ def addict_decorator(fn=None):
 
 
 @addict_decorator()
-def import_from_path(path):
-    module_name, function_name = path.split(':')
+def import_from_path(data):
+    module_name, function_name = data.path.split(':')
     module = importlib.import_module(module_name)
     function = getattr(module, function_name)
     return locals()
@@ -260,14 +278,31 @@ def json_encode_value(s):
         return str(s)
 
 
+def json_encode(d):
+    if isinstance(d, (list, tuple)):
+        return type(d)(json_encode_value(_) for _ in d)
+    elif isinstance(d, dict):
+        store = {}
+        for key, value in d.items():
+            store[key] = json_encode(value)
+        return store
+    elif isinstance(d, (bool, float, int, type(None))):
+        return d
+    elif hasattr(d, '__attrs_attrs__'):
+        return json_encode(attr.asdict(d))
+    else:
+        return json_encode_value(d)
+
+
 @addict_decorator()
 def run(options={}):
     app = flask.Flask(__name__)
-    items = [import_from_path(path) for path in options.paths]
+    items = [import_from_path(item) for item in options.paths]
     for item in items:
-        app.route('/{}/{}'.format(
-            item.module.__name__, item.function.__name__))(auth_wrapper(
-                item.function, auth_url=options.auth_url))
+        app.route(
+            item.data.endpoint
+            or '/{}/{}'.format(item.module.__name__, item.function.__name__))(
+                auth_wrapper(item.function, auth_url=options.auth_url))
     GunicornServer(application=app.wsgi_app, **options.server).run()
 
 

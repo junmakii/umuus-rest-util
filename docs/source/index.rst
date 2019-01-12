@@ -21,7 +21,10 @@ Usage
 
     $ cat options.json
 
-    {"paths": ["umuus_rest_util:test_view"],
+    {"paths": [
+       {"path": "umuus_rest_util:test_view"},
+       {"path": "umuus_rest_util:test_view", "endpoint": "/test"}
+     ],
      "server": {
          "host": "localhost",
          "port": 8033,
