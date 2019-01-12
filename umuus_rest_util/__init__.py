@@ -336,7 +336,8 @@ def run(options={}):
         app.route(
             item.data.endpoint
             or '/{}/{}'.format(item.module.__name__, item.function.__name__))(
-                wrapper(item.function, auth_url=options.auth_url))
+                wrapper(
+                    item.function, auth_url=item.auth_url or options.auth_url))
     GunicornServer(application=app.wsgi_app, **options.server).run()
 
 
