@@ -205,11 +205,13 @@ def test_error_view(**kwargs):
     return 0 / 0
 
 
-def auth_wrapper(fn, auth_url='', method='GET'):
+def auth_wrapper(fn,
+                 auth_url='',
+                 method='GET',
+                 headers={'Access-Control-Allow-Origin': '*'}):
     @functools.wraps(fn)
     def wrapper():
         try:
-            headers = {'Access-Control-Allow-Origin': '*'}
             res = requests.request(
                 method,
                 auth_url,
