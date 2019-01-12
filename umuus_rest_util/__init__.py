@@ -157,6 +157,7 @@ import requests.auth
 import fire
 import attr
 import addict
+import whitenoise
 import gunicorn.app.base
 __version__ = '0.1'
 __url__ = 'https://github.com/junmakii/umuus-rest-util'
@@ -206,39 +207,36 @@ def test_error_view(**kwargs):
     return 0 / 0
 
 
-def auth_wrapper(fn,
-                 auth_url='',
-                 method='GET',
-                 headers={'Access-Control-Allow-Origin': '*'}):
+def wrapper(fn,
+            auth_url='',
+            method='GET',
+            headers={'Access-Control-Allow-Origin': '*'}):
     @functools.wraps(fn)
     def wrapper():
         try:
-            res = requests.request(
-                method,
-                auth_url,
-                headers=dict(flask.request.headers),
-                auth=(flask.request.authorization
-                      and requests.auth.HTTPBasicAuth(
-                          **flask.request.authorization)),
-            )
+            if auth_url:
+                res = requests.request(
+                    method,
+                    auth_url,
+                    headers=dict(flask.request.headers),
+                    auth=(flask.request.authorization
+                          and requests.auth.HTTPBasicAuth(
+                              **flask.request.authorization)),
+                )
+                if res.status_code != 200:
+                    return flask.Response(
+                        res.text,
+                        status=res.status_code,
+                        headers=dict(res.headers, **headers),
+                    )
             request_params = {
                 key: json_encode_value(
                     (value[0] if isinstance(value, list) else value))
                 for key, value in (list(flask.request.args.items()) +
                                    list(flask.request.form.items()))
             }
-            if res.status_code == 200:
-                res = json_encode(fn(**request_params))
-                return flask.Response(
-                    res,
-                    headers=headers,
-                )
-            else:
-                return flask.Response(
-                    res.text,
-                    status=res.status_code,
-                    headers=dict(res.headers, **headers),
-                )
+            res = json_encode(fn(**request_params))
+            return flask.Response(res, headers=headers)
         except Exception as err:
             traceback.print_exc(file=sys.stderr)
             return flask.Response(
@@ -305,7 +303,7 @@ def run(options={}):
         app.route(
             item.data.endpoint
             or '/{}/{}'.format(item.module.__name__, item.function.__name__))(
-                auth_wrapper(item.function, auth_url=options.auth_url))
+                wrapper(item.function, auth_url=options.auth_url))
     GunicornServer(application=app.wsgi_app, **options.server).run()
 
 
@@ -328,11 +326,16 @@ class GunicornServer(object):
     debug = attr.ib(True)
     application = attr.ib(None)
     static_folder = attr.ib(None)
-    static_url_path = attr.ib('')
+    static_url_path = attr.ib('static')
 
     def __attrs_post_init__(self):
         self.options['bind'] = (self.options.get('bind')
                                 or '%s:%d' % (self.host, self.port))
+        self.application = whitenoise.WhiteNoise(
+            self.application,
+            root=self.static_folder,
+            prefix=self.static_url_path,
+        )
 
     def run(self):
         _self = self
