@@ -1,0 +1,4 @@
+apiVersion: v1
+description: "A REST API utility for Python."
+name: umuus_rest_util
+version: 0.1
